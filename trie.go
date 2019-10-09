@@ -30,19 +30,19 @@ func (trie *Node) Insert(key string, data interface{}) {
 	trie.Data = data
 }
 
-func (trie *Node) Search(key string) (interface{}, bool) {
-	node, ok := trie.findNode(key)
-	if ok && node.Data != nil {
-		return node.Data, true
+func (trie *Node) Search(key string) interface{} {
+	trie = trie.findNode(key)
+	if trie != nil {
+		return trie.Data
 	}
-	return nil, false
+	return nil
 }
 
 func (trie *Node) HasPrefix(key string) map[string]interface{} {
 	var results = make(map[string]interface{})
 
-	pnode, ok := trie.findNode(key)
-	if !ok {
+	pnode := trie.findNode(key)
+	if pnode == nil {
 		return results
 	}
 
@@ -65,31 +65,31 @@ func (trie *Node) HasPrefix(key string) map[string]interface{} {
 }
 
 func (trie *Node) Delete(key string) bool {
-	node, ok := trie.findNode(key)
-	if !ok || node.Data == nil {
+	trie = trie.findNode(key)
+	if trie == nil || trie.Data == nil {
 		return false
 	}
 
-	node.Data = nil
+	trie.Data = nil
 
-	for node.Data == nil && len(node.Children) == 0 && node.Parent != nil {
-		delete(node.Parent.Children, node.Symbol)
-		parent := node.Parent
-		node.Parent = nil
-		node = parent
+	for trie.Data == nil && len(trie.Children) == 0 && trie.Parent != nil {
+		delete(trie.Parent.Children, trie.Symbol)
+		parent := trie.Parent
+		trie.Parent = nil
+		trie = parent
 	}
 	return true
 }
 
-func (trie *Node) findNode(key string) (*Node, bool) {
+func (trie *Node) findNode(key string) *Node {
 	var ok bool
 	for _, r := range key {
 		trie, ok = trie.Children[r]
 		if !ok {
-			return nil, false
+			return nil
 		}
 	}
-	return trie, true
+	return trie
 }
 
 func (node *Node) key() string {

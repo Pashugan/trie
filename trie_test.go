@@ -43,7 +43,7 @@ func TestInsertAndSearch(t *testing.T) {
 	}
 
 	for _, item := range cases {
-		value, _ := trie.Search(item.Key)
+		value := trie.Search(item.Key)
 		if value != item.ExpectedValue {
 			t.Errorf("Invalid value: expected %v, got %v", item.ExpectedValue, value)
 		}
@@ -78,7 +78,7 @@ func TestDelete(t *testing.T) {
 	}
 
 	for _, item := range cases {
-		value, _ := trie.Search(item.Key)
+		value := trie.Search(item.Key)
 		if value != item.ExpectedValue {
 			t.Errorf("Invalid value: expected %v, got %v", item.ExpectedValue, value)
 		}
