@@ -1,17 +1,40 @@
 package trie
 
 import (
+	"bufio"
+	"compress/bzip2"
+	"log"
+	"os"
 	"reflect"
 	"testing"
 )
 
-var initData = []struct {
+var testData = []struct {
 	Key   string
 	Value interface{}
 }{
 	{"foo", 11},
 	{"foobar", 111},
 	{"bar", 22},
+}
+
+var benchData []string
+
+func init() {
+	file, err := os.Open("fixtures/words.bz2")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(bzip2.NewReader(file))
+	for scanner.Scan() {
+		benchData = append(benchData, scanner.Text())
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func TestNewTrie(t *testing.T) {
@@ -38,7 +61,7 @@ func TestInsertAndSearch(t *testing.T) {
 	}
 
 	trie := NewTrie()
-	for _, item := range initData {
+	for _, item := range testData {
 		trie.Insert(item.Key, item.Value)
 	}
 
@@ -63,7 +86,7 @@ func TestDelete(t *testing.T) {
 	}
 
 	trie := NewTrie()
-	for _, item := range initData {
+	for _, item := range testData {
 		trie.Insert(item.Key, item.Value)
 	}
 
@@ -108,7 +131,7 @@ func TestHasPrefix(t *testing.T) {
 	}
 
 	trie := NewTrie()
-	for _, item := range initData {
+	for _, item := range testData {
 		trie.Insert(item.Key, item.Value)
 	}
 
@@ -117,5 +140,53 @@ func TestHasPrefix(t *testing.T) {
 		if !reflect.DeepEqual(value, item.ExpectedValue) {
 			t.Errorf("Invalid prefix values: expected %v, got %v", item.ExpectedValue, value)
 		}
+	}
+}
+
+func BenchmarkInsert(b *testing.B) {
+	trie := NewTrie()
+	length := len(benchData)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		trie.Insert(benchData[i%length], struct{}{})
+	}
+}
+
+func BenchmarkSearch(b *testing.B) {
+	trie := NewTrie()
+	for _, key := range benchData {
+		trie.Insert(key, struct{}{})
+	}
+
+	length := len(benchData)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		trie.Search(benchData[i%length])
+	}
+}
+
+func BenchmarkHasPrefix(b *testing.B) {
+	trie := NewTrie()
+	for _, key := range benchData {
+		trie.Insert(key, struct{}{})
+	}
+
+	length := len(benchData)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		trie.HasPrefix(benchData[i%length])
+	}
+}
+
+func BenchmarkDelete(b *testing.B) {
+	trie := NewTrie()
+	for _, key := range benchData {
+		trie.Insert(key, struct{}{})
+	}
+
+	length := len(benchData)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		trie.Delete(benchData[i%length])
 	}
 }

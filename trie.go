@@ -15,8 +15,8 @@ func NewTrie() *Node {
 
 func (trie *Node) Insert(key string, data interface{}) {
 	for _, r := range key {
-		node, ok := trie.Children[r]
-		if !ok {
+		node := trie.Children[r]
+		if node == nil {
 			node = &Node{
 				Symbol:   r,
 				Parent:   trie,
@@ -82,10 +82,9 @@ func (trie *Node) Delete(key string) bool {
 }
 
 func (trie *Node) findNode(key string) *Node {
-	var ok bool
 	for _, r := range key {
-		trie, ok = trie.Children[r]
-		if !ok {
+		trie = trie.Children[r]
+		if trie == nil {
 			return nil
 		}
 	}
