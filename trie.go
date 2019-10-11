@@ -50,16 +50,17 @@ func (trie *Node) HasPrefix(key string) map[string]interface{} {
 		results[key] = pnode.Data
 	}
 
-	var findNodes func(*Node)
-	findNodes = func(node *Node) {
-		for _, node := range node.Children {
+	var findNodes func(*Node, string)
+	findNodes = func(node *Node, prefix string) {
+		for r, node := range node.Children {
+			key := prefix + string(r)
 			if node.Data != nil {
-				results[node.key()] = node.Data
+				results[key] = node.Data
 			}
-			findNodes(node)
+			findNodes(node, key)
 		}
 	}
-	findNodes(pnode)
+	findNodes(pnode, key)
 
 	return results
 }
@@ -89,16 +90,4 @@ func (trie *Node) findNode(key string) *Node {
 		}
 	}
 	return trie
-}
-
-func (node *Node) key() string {
-	key := make([]rune, 0)
-	for node.Parent != nil {
-		key = append(key, node.Symbol)
-		node = node.Parent
-	}
-	for i := 0; i < len(key)/2; i++ {
-		key[i], key[len(key)-1-i] = key[len(key)-1-i], key[i]
-	}
-	return string(key)
 }
