@@ -38,29 +38,29 @@ func (trie *Node) Search(key string) interface{} {
 	return nil
 }
 
-func (trie *Node) HasPrefix(key string) map[string]interface{} {
+func (trie *Node) HasPrefix(prefix string) map[string]interface{} {
 	var results = make(map[string]interface{})
 
-	pnode := trie.findNode(key)
+	pnode := trie.findNode(prefix)
 	if pnode == nil {
 		return results
 	}
 
 	if pnode.Data != nil {
-		results[key] = pnode.Data
+		results[prefix] = pnode.Data
 	}
 
-	var findNodes func(*Node, string)
-	findNodes = func(node *Node, prefix string) {
+	var findResults func(*Node, string)
+	findResults = func(node *Node, prefix string) {
 		for r, node := range node.Children {
-			key := prefix + string(r)
+			childPrefix := prefix + string(r)
 			if node.Data != nil {
-				results[key] = node.Data
+				results[childPrefix] = node.Data
 			}
-			findNodes(node, key)
+			findResults(node, childPrefix)
 		}
 	}
-	findNodes(pnode, key)
+	findResults(pnode, prefix)
 
 	return results
 }
