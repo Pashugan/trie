@@ -47,6 +47,18 @@ func TestNewTrie(t *testing.T) {
 	}
 }
 
+func TestEmptyTrie(t *testing.T) {
+	trie := NewTrie()
+	res := trie.Search("xyz")
+	if res != nil {
+		t.Errorf("Search in empty trie must return nil")
+	}
+	ok := trie.Delete("xyz")
+	if ok {
+		t.Errorf("Delete in empty trie must fail")
+	}
+}
+
 func TestInsertAndSearch(t *testing.T) {
 	cases := []struct {
 		Key           string
