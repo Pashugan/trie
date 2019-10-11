@@ -41,7 +41,7 @@ func TestNewTrie(t *testing.T) {
 	var trie interface{}
 
 	trie = NewTrie()
-	_, ok := trie.(*Node)
+	_, ok := trie.(*Trie)
 	if !ok {
 		t.Errorf("Invalid trie type")
 	}

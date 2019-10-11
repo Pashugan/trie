@@ -1,5 +1,12 @@
 package trie
 
+import "sync"
+
+type Trie struct {
+	sync.RWMutex
+	Root *Node
+}
+
 type Node struct {
 	Symbol   rune
 	Parent   *Node
@@ -7,87 +14,105 @@ type Node struct {
 	Data     interface{}
 }
 
-func NewTrie() *Node {
-	return &Node{
-		Children: make(map[rune]*Node),
+func NewTrie() *Trie {
+	return &Trie{
+		Root: &Node{
+			Children: make(map[rune]*Node),
+		},
 	}
 }
 
-func (trie *Node) Insert(key string, data interface{}) {
+func (trie *Trie) Insert(key string, data interface{}) {
+	trie.Lock()
+
+	node := trie.Root
 	for _, r := range key {
-		node := trie.Children[r]
-		if node == nil {
-			node = &Node{
+		childNode := node.Children[r]
+		if childNode == nil {
+			childNode = &Node{
 				Symbol:   r,
-				Parent:   trie,
+				Parent:   node,
 				Children: make(map[rune]*Node),
 			}
-			trie.Children[r] = node
+			node.Children[r] = childNode
 		}
-		trie = node
+		node = childNode
 	}
 
-	trie.Data = data
+	node.Data = data
+
+	trie.Unlock()
 }
 
-func (trie *Node) Search(key string) interface{} {
-	trie = trie.findNode(key)
-	if trie != nil {
-		return trie.Data
+func (trie *Trie) Search(key string) interface{} {
+	trie.RLock()
+	node := trie.Root.findNode(key)
+	trie.RUnlock()
+
+	if node == nil {
+		return nil
 	}
-	return nil
+	return node.Data
 }
 
-func (trie *Node) HasPrefix(prefix string) map[string]interface{} {
+func (trie *Trie) HasPrefix(prefix string) map[string]interface{} {
 	var results = make(map[string]interface{})
 
-	pnode := trie.findNode(prefix)
-	if pnode == nil {
+	trie.RLock()
+	defer trie.RUnlock()
+
+	node := trie.Root.findNode(prefix)
+	if node == nil {
 		return results
 	}
 
-	if pnode.Data != nil {
-		results[prefix] = pnode.Data
+	if node.Data != nil {
+		results[prefix] = node.Data
 	}
 
 	var findResults func(*Node, string)
 	findResults = func(node *Node, prefix string) {
-		for r, node := range node.Children {
+		for r, childNode := range node.Children {
 			childPrefix := prefix + string(r)
-			if node.Data != nil {
-				results[childPrefix] = node.Data
+			if childNode.Data != nil {
+				results[childPrefix] = childNode.Data
 			}
-			findResults(node, childPrefix)
+			findResults(childNode, childPrefix)
 		}
 	}
-	findResults(pnode, prefix)
+	findResults(node, prefix)
 
 	return results
 }
 
-func (trie *Node) Delete(key string) bool {
-	trie = trie.findNode(key)
-	if trie == nil || trie.Data == nil {
+func (trie *Trie) Delete(key string) bool {
+	trie.Lock()
+	defer trie.Unlock()
+
+	node := trie.Root.findNode(key)
+	if node == nil || node.Data == nil {
 		return false
 	}
 
-	trie.Data = nil
+	node.Data = nil
 
-	for trie.Data == nil && len(trie.Children) == 0 && trie.Parent != nil {
-		delete(trie.Parent.Children, trie.Symbol)
-		parent := trie.Parent
-		trie.Parent = nil
-		trie = parent
+	for node.Data == nil && len(node.Children) == 0 && node.Parent != nil {
+		delete(node.Parent.Children, node.Symbol)
+		parent := node.Parent
+		node.Parent = nil
+		node = parent
 	}
+
 	return true
 }
 
-func (trie *Node) findNode(key string) *Node {
+// Ensure it is called inside the mutex lock
+func (node *Node) findNode(key string) *Node {
 	for _, r := range key {
-		trie = trie.Children[r]
-		if trie == nil {
+		node = node.Children[r]
+		if node == nil {
 			return nil
 		}
 	}
-	return trie
+	return node
 }
