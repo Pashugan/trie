@@ -47,7 +47,7 @@ func (trie *Node) HasPrefix(key string) map[string]interface{} {
 	}
 
 	if pnode.Data != nil {
-		results[pnode.key()] = pnode.Data
+		results[key] = pnode.Data
 	}
 
 	var findNodes func(*Node)
