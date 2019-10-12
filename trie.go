@@ -2,7 +2,9 @@
 // Use of this source code is governed by MIT License
 // that can be found in the LICENSE file.
 
-// Package trie implements a thread-safe trie, also called digital tree or prefix tree.
+// Package trie implements a thread-safe trie, also known as
+// digital tree or prefix tree. It can be used as a drop-in
+// replacement for usual Go maps with string keys.
 package trie
 
 import "sync"
@@ -29,7 +31,7 @@ func NewTrie() *Trie {
 	}
 }
 
-// Insert adds or replaces the stored data at the given key.
+// Insert adds or replaces the data stored at the given key.
 func (trie *Trie) Insert(key string, data interface{}) {
 	trie.Lock()
 
@@ -52,7 +54,7 @@ func (trie *Trie) Insert(key string, data interface{}) {
 	trie.Unlock()
 }
 
-// Search returns the stored data at the given key.
+// Search returns the data stored at the given key.
 func (trie *Trie) Search(key string) interface{} {
 	trie.RLock()
 	node := trie.root.findNode(key)
@@ -96,7 +98,9 @@ func (trie *Trie) HasPrefix(prefix string) map[string]interface{} {
 	return results
 }
 
-// Delete removes the stored data at the given key.
+// Delete removes the data stored at the given key and
+// returns true on success and false if the key wasn't
+// previously set.
 func (trie *Trie) Delete(key string) bool {
 	trie.Lock()
 	defer trie.Unlock()
