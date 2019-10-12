@@ -1,3 +1,10 @@
+// Copyright 2019 Pavel Knoblokh. All rights reserved.
+// Use of this source code is governed by MIT License
+// that can be found in the LICENSE file.
+// The fixtures data was kindly borrowed and sampled
+// from /usr/share/dict/web2 on MacOS and,
+// according to their README, is copyright free.
+
 package trie
 
 import (

@@ -6,4 +6,8 @@
 
 # Trie
 
-Yet another Golang [trie](https://en.wikipedia.org/wiki/Trie) implementation.
+## Overview
+
+Yet another thread-safe Golang [trie](https://en.wikipedia.org/wiki/Trie) implementation
+with the focus on simplicity, performance and support of concurrency. Trie is also known
+as digital tree or prefix tree.

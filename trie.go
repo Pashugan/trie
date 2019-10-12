@@ -1,7 +1,13 @@
+// Copyright 2019 Pavel Knoblokh. All rights reserved.
+// Use of this source code is governed by MIT License
+// that can be found in the LICENSE file.
+
+// Package trie implements a thread-safe trie, also called digital tree or prefix tree.
 package trie
 
 import "sync"
 
+// A Trie is an ordered tree data structure.
 type Trie struct {
 	sync.RWMutex
 	root *Node
@@ -14,6 +20,7 @@ type Node struct {
 	data     interface{}
 }
 
+// NewTrie creates a new empty trie.
 func NewTrie() *Trie {
 	return &Trie{
 		root: &Node{
@@ -22,6 +29,7 @@ func NewTrie() *Trie {
 	}
 }
 
+// Insert adds or replaces the stored data at the given key.
 func (trie *Trie) Insert(key string, data interface{}) {
 	trie.Lock()
 
@@ -44,6 +52,7 @@ func (trie *Trie) Insert(key string, data interface{}) {
 	trie.Unlock()
 }
 
+// Search returns the stored data at the given key.
 func (trie *Trie) Search(key string) interface{} {
 	trie.RLock()
 	node := trie.root.findNode(key)
@@ -55,6 +64,8 @@ func (trie *Trie) Search(key string) interface{} {
 	return node.data
 }
 
+// HasPrefix returns the map of all the keys and
+// their corresponding data for the given key prefix.
 func (trie *Trie) HasPrefix(prefix string) map[string]interface{} {
 	var results = make(map[string]interface{})
 
@@ -85,6 +96,7 @@ func (trie *Trie) HasPrefix(prefix string) map[string]interface{} {
 	return results
 }
 
+// Delete removes the stored data at the given key.
 func (trie *Trie) Delete(key string) bool {
 	trie.Lock()
 	defer trie.Unlock()
