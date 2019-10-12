@@ -47,15 +47,37 @@ func TestNewTrie(t *testing.T) {
 	}
 }
 
-func TestEmptyTrie(t *testing.T) {
+func TestEdgeCases(t *testing.T) {
 	trie := NewTrie()
 	res := trie.Search("xyz")
 	if res != nil {
 		t.Errorf("Search in empty trie must return nil")
 	}
+
 	ok := trie.Delete("xyz")
 	if ok {
 		t.Errorf("Delete in empty trie must fail")
+	}
+
+	res = trie.Search("")
+	if res != nil {
+		t.Errorf("Empty key in empty trie must return nil")
+	}
+
+	trie.Insert("", 1234)
+	res = trie.Search("")
+	if res != 1234 {
+		t.Errorf("Root node must also be able to store data")
+	}
+
+	want := map[string]interface{}{
+		"":    1234,
+		"xyz": "xyz",
+	}
+	trie.Insert("xyz", "xyz")
+	got := trie.HasPrefix("")
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("HasPrefix must include root node data if available")
 	}
 }
 
@@ -67,7 +89,6 @@ func TestInsertAndSearch(t *testing.T) {
 		{"foo", 11},
 		{"foobar", 111},
 		{"bar", 22},
-		{"", nil},
 		{"foob", nil},
 		{"foobarr", nil},
 	}
