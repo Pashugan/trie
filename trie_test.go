@@ -204,7 +204,23 @@ func TestCounters(t *testing.T) {
 	}
 }
 
-func BenchmarkInsert(b *testing.B) {
+func getBenchTrie() *Trie {
+	trie := NewTrie()
+	for _, key := range benchData {
+		trie.Insert(key, struct{}{})
+	}
+	return trie
+}
+
+func getBenchMap() map[string]interface{} {
+	m := make(map[string]interface{})
+	for _, key := range benchData {
+		m[key] = struct{}{}
+	}
+	return m
+}
+
+func BenchmarkInsertTrie(b *testing.B) {
 	trie := NewTrie()
 	length := len(benchData)
 	b.ResetTimer()
@@ -213,24 +229,57 @@ func BenchmarkInsert(b *testing.B) {
 	}
 }
 
-func BenchmarkSearch(b *testing.B) {
-	trie := NewTrie()
-	for _, key := range benchData {
-		trie.Insert(key, struct{}{})
+func BenchmarkInsertMap(b *testing.B) {
+	m := make(map[string]interface{})
+	length := len(benchData)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		m[benchData[i%length]] = struct{}{}
 	}
+}
+
+func BenchmarkSearchTrie(b *testing.B) {
+	trie := getBenchTrie()
 
 	length := len(benchData)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		trie.Search(benchData[i%length])
+		_ = trie.Search(benchData[i%length])
 	}
 }
 
-func BenchmarkHasPrefix(b *testing.B) {
-	trie := NewTrie()
-	for _, key := range benchData {
-		trie.Insert(key, struct{}{})
+func BenchmarkSearchMap(b *testing.B) {
+	m := getBenchMap()
+
+	length := len(benchData)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = m[benchData[i%length]]
 	}
+}
+
+func BenchmarkDeleteTrie(b *testing.B) {
+	trie := getBenchTrie()
+
+	length := len(benchData)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		trie.Delete(benchData[i%length])
+	}
+}
+
+func BenchmarkDeleteMap(b *testing.B) {
+	m := getBenchMap()
+
+	length := len(benchData)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		delete(m, benchData[i%length])
+	}
+}
+
+func BenchmarkHasPrefixTrie(b *testing.B) {
+	trie := getBenchTrie()
 
 	length := len(benchData)
 	b.ResetTimer()
@@ -239,15 +288,25 @@ func BenchmarkHasPrefix(b *testing.B) {
 	}
 }
 
-func BenchmarkDelete(b *testing.B) {
-	trie := NewTrie()
-	for _, key := range benchData {
-		trie.Insert(key, struct{}{})
-	}
+func BenchmarkHasPrefixMap(b *testing.B) {
+	m := getBenchMap()
 
 	length := len(benchData)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		trie.Delete(benchData[i%length])
+		prefix := benchData[i%length]
+		prefixLen := len(prefix)
+		results := make(map[string]interface{})
+		for k, v := range m {
+			kLen := len(k)
+			if kLen >= prefixLen {
+				if kLen > prefixLen {
+					k = k[:prefixLen]
+				}
+				if k == prefix {
+					results[k] = v
+				}
+			}
+		}
 	}
 }
