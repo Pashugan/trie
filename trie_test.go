@@ -97,6 +97,14 @@ func TestMapHasPrefix(t *testing.T) {
 	}
 }
 
+func getTestTrie() *Trie {
+	trie := NewTrie()
+	for _, item := range testData {
+		trie.Insert(item.Key, item.Value)
+	}
+	return trie
+}
+
 func TestNewTrie(t *testing.T) {
 	var trie interface{}
 
@@ -153,10 +161,7 @@ func TestInsertAndSearch(t *testing.T) {
 		{"foobarr", nil},
 	}
 
-	trie := NewTrie()
-	for _, item := range testData {
-		trie.Insert(item.Key, item.Value)
-	}
+	trie := getTestTrie()
 
 	for _, item := range cases {
 		value := trie.Search(item.Key)
@@ -178,10 +183,7 @@ func TestDelete(t *testing.T) {
 		{"foob", nil},
 	}
 
-	trie := NewTrie()
-	for _, item := range testData {
-		trie.Insert(item.Key, item.Value)
-	}
+	trie := getTestTrie()
 
 	ok := trie.Delete("foob")
 	if ok {
@@ -223,10 +225,7 @@ func TestHasPrefix(t *testing.T) {
 		{"xyz", map[string]interface{}{}},
 	}
 
-	trie := NewTrie()
-	for _, item := range testData {
-		trie.Insert(item.Key, item.Value)
-	}
+	trie := getTestTrie()
 
 	for _, item := range cases {
 		value := trie.HasPrefix(item.Key)
@@ -271,6 +270,26 @@ func getBenchMap() map[string]interface{} {
 		m[key] = struct{}{}
 	}
 	return m
+}
+
+func BenchmarkHasPrefixTrie(b *testing.B) {
+	trie := getBenchTrie()
+
+	length := len(benchData)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = trie.HasPrefix(benchData[i%length])
+	}
+}
+
+func BenchmarkHasPrefixMap(b *testing.B) {
+	m := PrefixMap(getBenchMap())
+
+	length := len(benchData)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = m.HasPrefix(benchData[i%length])
+	}
 }
 
 func BenchmarkInsertTrie(b *testing.B) {
@@ -328,25 +347,5 @@ func BenchmarkDeleteMap(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		delete(m, benchData[i%length])
-	}
-}
-
-func BenchmarkHasPrefixTrie(b *testing.B) {
-	trie := getBenchTrie()
-
-	length := len(benchData)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_ = trie.HasPrefix(benchData[i%length])
-	}
-}
-
-func BenchmarkHasPrefixMap(b *testing.B) {
-	m := PrefixMap(getBenchMap())
-
-	length := len(benchData)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_ = m.HasPrefix(benchData[i%length])
 	}
 }
