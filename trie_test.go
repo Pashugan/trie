@@ -44,6 +44,59 @@ func init() {
 	}
 }
 
+type PrefixMap map[string]interface{}
+
+func (m PrefixMap) HasPrefix(prefix string) map[string]interface{} {
+	results := make(map[string]interface{})
+
+	prefixLen := len(prefix)
+	for key, value := range m {
+		if len(key) >= prefixLen {
+			k := key[:prefixLen]
+			if k == prefix {
+				results[key] = value
+			}
+		}
+	}
+
+	return results
+}
+
+func TestMapHasPrefix(t *testing.T) {
+	cases := []struct {
+		Key           string
+		ExpectedValue map[string]interface{}
+	}{
+		{"f", map[string]interface{}{
+			"foo":    11,
+			"foobar": 111,
+		}},
+		{"foo", map[string]interface{}{
+			"foo":    11,
+			"foobar": 111,
+		}},
+		{"foob", map[string]interface{}{
+			"foobar": 111,
+		}},
+		{"ba", map[string]interface{}{
+			"bar": 22,
+		}},
+		{"xyz", map[string]interface{}{}},
+	}
+
+	m := make(PrefixMap)
+	for _, item := range testData {
+		m[item.Key] = item.Value
+	}
+
+	for _, item := range cases {
+		value := m.HasPrefix(item.Key)
+		if !reflect.DeepEqual(value, item.ExpectedValue) {
+			t.Errorf("Invalid Map prefix values: expected %v, got %v", item.ExpectedValue, value)
+		}
+	}
+}
+
 func TestNewTrie(t *testing.T) {
 	var trie interface{}
 
@@ -284,29 +337,16 @@ func BenchmarkHasPrefixTrie(b *testing.B) {
 	length := len(benchData)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		trie.HasPrefix(benchData[i%length])
+		_ = trie.HasPrefix(benchData[i%length])
 	}
 }
 
 func BenchmarkHasPrefixMap(b *testing.B) {
-	m := getBenchMap()
+	m := PrefixMap(getBenchMap())
 
 	length := len(benchData)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		prefix := benchData[i%length]
-		prefixLen := len(prefix)
-		results := make(map[string]interface{})
-		for k, v := range m {
-			kLen := len(k)
-			if kLen >= prefixLen {
-				if kLen > prefixLen {
-					k = k[:prefixLen]
-				}
-				if k == prefix {
-					results[k] = v
-				}
-			}
-		}
+		_ = m.HasPrefix(benchData[i%length])
 	}
 }
