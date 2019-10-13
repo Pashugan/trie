@@ -183,6 +183,27 @@ func TestHasPrefix(t *testing.T) {
 	}
 }
 
+func TestCounters(t *testing.T) {
+	cases := []struct {
+		ExpectedLen     int
+		ExpectedNodeNum int
+	}{
+		{1, 3 + 1}, // +1 includes the root node
+		{2, 6 + 1},
+		{3, 9 + 1},
+	}
+	trie := NewTrie()
+	for i, item := range testData {
+		trie.Insert(item.Key, item.Value)
+		if trie.Len() != cases[i].ExpectedLen {
+			t.Errorf("Invalid trie length: expected %v, got %v", cases[i].ExpectedLen, trie.Len())
+		}
+		if trie.NodeNum() != cases[i].ExpectedNodeNum {
+			t.Errorf("Invalid trie node number: expected %v, got %v", cases[i].ExpectedNodeNum, trie.NodeNum())
+		}
+	}
+}
+
 func BenchmarkInsert(b *testing.B) {
 	trie := NewTrie()
 	length := len(benchData)

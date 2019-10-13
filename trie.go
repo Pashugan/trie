@@ -13,6 +13,8 @@ import "sync"
 type Trie struct {
 	sync.RWMutex
 	root *Node
+	size int
+	nnum int
 }
 
 type Node struct {
@@ -28,6 +30,7 @@ func NewTrie() *Trie {
 		root: &Node{
 			children: make(map[rune]*Node),
 		},
+		nnum: 1,
 	}
 }
 
@@ -45,11 +48,14 @@ func (trie *Trie) Insert(key string, data interface{}) {
 				children: make(map[rune]*Node),
 			}
 			node.children[r] = childNode
+			trie.nnum++
 		}
 		node = childNode
 	}
 
 	node.data = data
+
+	trie.size++
 
 	trie.Unlock()
 }
@@ -83,6 +89,7 @@ func (trie *Trie) HasPrefix(prefix string) map[string]interface{} {
 		results[prefix] = node.data
 	}
 
+	// Explicit declaration is needed for recursion to work
 	var findResults func(*Node, string)
 	findResults = func(node *Node, prefix string) {
 		for r, childNode := range node.children {
@@ -117,9 +124,25 @@ func (trie *Trie) Delete(key string) bool {
 		parent := node.parent
 		node.parent = nil
 		node = parent
+		trie.nnum--
 	}
 
+	trie.size--
+
 	return true
+}
+
+// Len returns the total number of keys stored in the trie
+func (trie *Trie) Len() int {
+	trie.RLock()
+	defer trie.RUnlock()
+	return trie.size
+}
+
+func (trie *Trie) NodeNum() int {
+	trie.RLock()
+	defer trie.RUnlock()
+	return trie.nnum
 }
 
 // Ensure it is called inside the mutex lock
