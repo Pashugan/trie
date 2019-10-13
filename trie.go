@@ -132,13 +132,15 @@ func (trie *Trie) Delete(key string) bool {
 	return true
 }
 
-// Len returns the total number of keys stored in the trie
+// Len returns the total number of keys stored in the trie.
 func (trie *Trie) Len() int {
 	trie.RLock()
 	defer trie.RUnlock()
 	return trie.size
 }
 
+// NodeNum returns the total number of internal nodes
+// in the trie, which can be useful for debugging.
 func (trie *Trie) NodeNum() int {
 	trie.RLock()
 	defer trie.RUnlock()
