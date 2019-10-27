@@ -32,7 +32,7 @@ BenchmarkDeleteMap-4       66109558        18 ns/op       0 B/op       0 allocs/
 
 ## Usage
 
-Download and install the package (or use [Go Modules](https://blog.golang.org/using-go-modules)).
+Download and install the package (or use [Go Modules](https://github.com/golang/go/wiki/Modules)).
 ```bash
 $ go get github.com/Pashugan/trie
 ```

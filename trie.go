@@ -12,23 +12,23 @@ import "sync"
 // A Trie is an ordered tree data structure.
 type Trie struct {
 	sync.RWMutex
-	root *Node
+	root *node
 	size int
 	nnum int
 }
 
-type Node struct {
+type node struct {
 	symbol   rune
-	parent   *Node
-	children map[rune]*Node
+	parent   *node
+	children map[rune]*node
 	data     interface{}
 }
 
 // NewTrie creates a new empty trie.
 func NewTrie() *Trie {
 	return &Trie{
-		root: &Node{
-			children: make(map[rune]*Node),
+		root: &node{
+			children: make(map[rune]*node),
 		},
 		nnum: 1,
 	}
@@ -38,22 +38,22 @@ func NewTrie() *Trie {
 func (trie *Trie) Insert(key string, data interface{}) {
 	trie.Lock()
 
-	node := trie.root
+	n := trie.root
 	for _, r := range key {
-		childNode := node.children[r]
+		childNode := n.children[r]
 		if childNode == nil {
-			childNode = &Node{
+			childNode = &node{
 				symbol:   r,
-				parent:   node,
-				children: make(map[rune]*Node),
+				parent:   n,
+				children: make(map[rune]*node),
 			}
-			node.children[r] = childNode
+			n.children[r] = childNode
 			trie.nnum++
 		}
-		node = childNode
+		n = childNode
 	}
 
-	node.data = data
+	n.data = data
 
 	trie.size++
 
@@ -63,13 +63,13 @@ func (trie *Trie) Insert(key string, data interface{}) {
 // Search returns the data stored at the given key.
 func (trie *Trie) Search(key string) interface{} {
 	trie.RLock()
-	node := trie.root.findNode(key)
+	n := trie.root.findNode(key)
 	trie.RUnlock()
 
-	if node == nil {
+	if n == nil {
 		return nil
 	}
-	return node.data
+	return n.data
 }
 
 // HasPrefix returns the map of all the keys and
@@ -80,19 +80,19 @@ func (trie *Trie) HasPrefix(prefix string) map[string]interface{} {
 	trie.RLock()
 	defer trie.RUnlock()
 
-	node := trie.root.findNode(prefix)
-	if node == nil {
+	n := trie.root.findNode(prefix)
+	if n == nil {
 		return results
 	}
 
-	if node.data != nil {
-		results[prefix] = node.data
+	if n.data != nil {
+		results[prefix] = n.data
 	}
 
 	// Explicit declaration is needed for recursion to work
-	var findResults func(*Node, string)
-	findResults = func(node *Node, prefix string) {
-		for r, childNode := range node.children {
+	var findResults func(*node, string)
+	findResults = func(n *node, prefix string) {
+		for r, childNode := range n.children {
 			childPrefix := prefix + string(r)
 			if childNode.data != nil {
 				results[childPrefix] = childNode.data
@@ -100,7 +100,7 @@ func (trie *Trie) HasPrefix(prefix string) map[string]interface{} {
 			findResults(childNode, childPrefix)
 		}
 	}
-	findResults(node, prefix)
+	findResults(n, prefix)
 
 	return results
 }
@@ -112,18 +112,18 @@ func (trie *Trie) Delete(key string) bool {
 	trie.Lock()
 	defer trie.Unlock()
 
-	node := trie.root.findNode(key)
-	if node == nil || node.data == nil {
+	n := trie.root.findNode(key)
+	if n == nil || n.data == nil {
 		return false
 	}
 
-	node.data = nil
+	n.data = nil
 
-	for node.data == nil && len(node.children) == 0 && node.parent != nil {
-		delete(node.parent.children, node.symbol)
-		parent := node.parent
-		node.parent = nil
-		node = parent
+	for n.data == nil && len(n.children) == 0 && n.parent != nil {
+		delete(n.parent.children, n.symbol)
+		parent := n.parent
+		n.parent = nil
+		n = parent
 		trie.nnum--
 	}
 
@@ -148,12 +148,12 @@ func (trie *Trie) NodeNum() int {
 }
 
 // Ensure it is called inside the mutex lock
-func (node *Node) findNode(key string) *Node {
+func (n *node) findNode(key string) *node {
 	for _, r := range key {
-		node = node.children[r]
-		if node == nil {
+		n = n.children[r]
+		if n == nil {
 			return nil
 		}
 	}
-	return node
+	return n
 }
