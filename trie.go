@@ -11,10 +11,10 @@ import "sync"
 
 // A Trie is an ordered tree data structure.
 type Trie struct {
-	sync.RWMutex
 	root *node
 	size int
 	nnum int
+	mu   sync.RWMutex
 }
 
 type node struct {
@@ -36,7 +36,7 @@ func NewTrie() *Trie {
 
 // Insert adds or replaces the data stored at the given key.
 func (trie *Trie) Insert(key string, data interface{}) {
-	trie.Lock()
+	trie.mu.Lock()
 
 	n := trie.root
 	for _, r := range key {
@@ -57,14 +57,14 @@ func (trie *Trie) Insert(key string, data interface{}) {
 
 	trie.size++
 
-	trie.Unlock()
+	trie.mu.Unlock()
 }
 
 // Search returns the data stored at the given key.
 func (trie *Trie) Search(key string) interface{} {
-	trie.RLock()
+	trie.mu.RLock()
 	n := trie.root.findNode(key)
-	trie.RUnlock()
+	trie.mu.RUnlock()
 
 	if n == nil {
 		return nil
@@ -77,8 +77,8 @@ func (trie *Trie) Search(key string) interface{} {
 func (trie *Trie) HasPrefix(prefix string) map[string]interface{} {
 	results := make(map[string]interface{})
 
-	trie.RLock()
-	defer trie.RUnlock()
+	trie.mu.RLock()
+	defer trie.mu.RUnlock()
 
 	n := trie.root.findNode(prefix)
 	if n == nil {
@@ -109,8 +109,8 @@ func (trie *Trie) HasPrefix(prefix string) map[string]interface{} {
 // returns true on success and false if the key wasn't
 // previously set.
 func (trie *Trie) Delete(key string) bool {
-	trie.Lock()
-	defer trie.Unlock()
+	trie.mu.Lock()
+	defer trie.mu.Unlock()
 
 	n := trie.root.findNode(key)
 	if n == nil || n.data == nil {
@@ -134,16 +134,16 @@ func (trie *Trie) Delete(key string) bool {
 
 // Len returns the total number of keys stored in the trie.
 func (trie *Trie) Len() int {
-	trie.RLock()
-	defer trie.RUnlock()
+	trie.mu.RLock()
+	defer trie.mu.RUnlock()
 	return trie.size
 }
 
 // NodeNum returns the total number of internal nodes
 // in the trie, which can be useful for debugging.
 func (trie *Trie) NodeNum() int {
-	trie.RLock()
-	defer trie.RUnlock()
+	trie.mu.RLock()
+	defer trie.mu.RUnlock()
 	return trie.nnum
 }
 
