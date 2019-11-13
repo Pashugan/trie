@@ -40,17 +40,17 @@ func (trie *Trie) Insert(key string, data interface{}) {
 
 	n := trie.root
 	for _, r := range key {
-		childNode := n.children[r]
-		if childNode == nil {
-			childNode = &node{
+		c := n.children[r]
+		if c == nil {
+			c = &node{
 				symbol:   r,
 				parent:   n,
 				children: make(map[rune]*node),
 			}
-			n.children[r] = childNode
+			n.children[r] = c
 			trie.nnum++
 		}
-		n = childNode
+		n = c
 	}
 
 	n.data = data
@@ -92,12 +92,12 @@ func (trie *Trie) HasPrefix(prefix string) map[string]interface{} {
 	// Explicit declaration is needed for recursion to work
 	var findResults func(*node, string)
 	findResults = func(n *node, prefix string) {
-		for r, childNode := range n.children {
+		for r, c := range n.children {
 			childPrefix := prefix + string(r)
-			if childNode.data != nil {
-				results[childPrefix] = childNode.data
+			if c.data != nil {
+				results[childPrefix] = c.data
 			}
-			findResults(childNode, childPrefix)
+			findResults(c, childPrefix)
 		}
 	}
 	findResults(n, prefix)
@@ -120,8 +120,8 @@ func (trie *Trie) Delete(key string) bool {
 	n.data = nil
 
 	for n.data == nil && len(n.children) == 0 && n.parent != nil {
-		delete(n.parent.children, n.symbol)
 		parent := n.parent
+		delete(parent.children, n.symbol)
 		n.parent = nil
 		n = parent
 		trie.nnum--
