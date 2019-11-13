@@ -349,3 +349,27 @@ func BenchmarkDeleteMap(b *testing.B) {
 		delete(m, benchData[i%length])
 	}
 }
+
+func BenchmarkSearchWhileInsert(b *testing.B) {
+	trie := getBenchTrie()
+
+	length := len(benchData)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		key := benchData[i%length]
+		go trie.Insert(key, struct{}{})
+		trie.Search(key)
+	}
+}
+
+func BenchmarkInsertWhileSearch(b *testing.B) {
+	trie := getBenchTrie()
+
+	length := len(benchData)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		key := benchData[i%length]
+		go trie.Search(key)
+		trie.Insert(key, struct{}{})
+	}
+}

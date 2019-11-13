@@ -20,14 +20,22 @@ interpreted as an example. The more keys share common prefixes (e.g. as in URLs)
 memory a trie consumes, and the faster inserts are.
 
 ```
-BenchmarkHasPrefixTrie-4     536878      3528 ns/op     554 B/op       7 allocs/op
-BenchmarkHasPrefixMap-4         294   4656022 ns/op     341 B/op       2 allocs/op
-BenchmarkInsertTrie-4        740662      1450 ns/op     102 B/op       1 allocs/op
-BenchmarkInsertMap-4        9070458       146 ns/op       1 B/op       0 allocs/op
-BenchmarkSearchTrie-4       1000000      1311 ns/op       0 B/op       0 allocs/op
-BenchmarkSearchMap-4       10521606       148 ns/op       0 B/op       0 allocs/op
-BenchmarkDeleteTrie-4      13413570        90 ns/op       0 B/op       0 allocs/op
-BenchmarkDeleteMap-4       66109558        18 ns/op       0 B/op       0 allocs/op
+BenchmarkHasPrefixTrie-4       671424      3113 ns/op     561 B/op       7 allocs/op
+BenchmarkHasPrefixMap-4           343   3511734 ns/op     341 B/op       2 allocs/op
+BenchmarkInsertTrie-4         1033538      1038 ns/op      73 B/op       1 allocs/op
+BenchmarkInsertMap-4         12719076        94 ns/op       0 B/op       0 allocs/op
+BenchmarkSearchTrie-4         1269013       924 ns/op       0 B/op       0 allocs/op
+BenchmarkSearchMap-4         11612143        96 ns/op       0 B/op       0 allocs/op
+BenchmarkDeleteTrie-4        14271276        75 ns/op       0 B/op       0 allocs/op
+BenchmarkDeleteMap-4         71850813        16 ns/op       0 B/op       0 allocs/op
+
+BenchmarkSearchWhileInsert    1000000      3853 ns/op       1 B/op       0 allocs/op
+BenchmarkSearchWhileInsert-2   332025      4529 ns/op       0 B/op       0 allocs/op
+BenchmarkSearchWhileInsert-4   263719      5301 ns/op       0 B/op       0 allocs/op
+
+BenchmarkInsertWhileSearch     966741      2104 ns/op       1 B/op       0 allocs/op
+BenchmarkInsertWhileSearch-2   381709      3721 ns/op       0 B/op       0 allocs/op
+BenchmarkInsertWhileSearch-4   429175      3374 ns/op       0 B/op       0 allocs/op
 ```
 
 ## Usage
