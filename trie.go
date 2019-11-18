@@ -63,9 +63,9 @@ func (trie *Trie) Insert(key string, data interface{}) {
 // Search returns the data stored at the given key.
 func (trie *Trie) Search(key string) interface{} {
 	trie.mu.RLock()
-	n := trie.root.findNode(key)
-	trie.mu.RUnlock()
+	defer trie.mu.RUnlock()
 
+	n := trie.root.findNode(key)
 	if n == nil {
 		return nil
 	}
