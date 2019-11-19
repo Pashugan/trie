@@ -374,7 +374,7 @@ func BenchmarkInsertWhileSearch(b *testing.B) {
 	}
 }
 
-func BenchmarkParallel(b *testing.B) {
+func BenchmarkSearchWhileInsertParallel(b *testing.B) {
 	trie := getBenchTrie()
 
 	length := len(benchData)
@@ -383,8 +383,24 @@ func BenchmarkParallel(b *testing.B) {
 		i := 0
 		for pb.Next() {
 			key := benchData[i%length]
-			trie.Insert(key, struct{}{})
+			go trie.Insert(key, struct{}{})
 			trie.Search(key)
+			i++
+		}
+	})
+}
+
+func BenchmarkInsertWhileSearchParallel(b *testing.B) {
+	trie := getBenchTrie()
+
+	length := len(benchData)
+	b.ResetTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		i := 0
+		for pb.Next() {
+			key := benchData[i%length]
+			go trie.Search(key)
+			trie.Insert(key, struct{}{})
 			i++
 		}
 	})
