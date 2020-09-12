@@ -72,9 +72,9 @@ func (trie *Trie) Search(key string) interface{} {
 	return n.data
 }
 
-// HasPrefix returns the map of all the keys and
+// WithPrefix returns the map of all the keys and
 // their corresponding data for the given key prefix.
-func (trie *Trie) HasPrefix(prefix string) map[string]interface{} {
+func (trie *Trie) WithPrefix(prefix string) map[string]interface{} {
 	results := make(map[string]interface{})
 
 	trie.mu.RLock()

@@ -20,8 +20,8 @@ interpreted as an example. The more keys share common prefixes (e.g. as in URLs)
 memory a trie consumes, and the faster inserts are.
 
 ```
-BenchmarkHasPrefixTrie-4       671424      3113 ns/op     561 B/op       7 allocs/op
-BenchmarkHasPrefixMap-4           343   3511734 ns/op     341 B/op       2 allocs/op
+BenchmarkWithPrefixTrie-4      671424      3113 ns/op     561 B/op       7 allocs/op
+BenchmarkWithPrefixMap-4          343   3511734 ns/op     341 B/op       2 allocs/op
 BenchmarkInsertTrie-4         1033538      1038 ns/op      73 B/op       1 allocs/op
 BenchmarkInsertMap-4         12719076        94 ns/op       0 B/op       0 allocs/op
 BenchmarkSearchTrie-4         1269013       924 ns/op       0 B/op       0 allocs/op
@@ -85,7 +85,7 @@ func main() {
 	// Output: The deleted key is now <nil>
 
 	// Fetch keys starting with a prefix
-	fmt.Printf("But the other cities on \"Bri\" are still there: %v\n", cityPop.HasPrefix("Bri"))
+	fmt.Printf("But the other cities on \"Bri\" are still there: %v\n", cityPop.WithPrefix("Bri"))
 	// Output: But the other cities on "Bri" are still there: map[Bridgeport:144900 Bristol:463400]
 
 	// Count the length of the trie

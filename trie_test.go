@@ -46,7 +46,7 @@ func init() {
 
 type PrefixMap map[string]interface{}
 
-func (m PrefixMap) HasPrefix(prefix string) map[string]interface{} {
+func (m PrefixMap) WithPrefix(prefix string) map[string]interface{} {
 	results := make(map[string]interface{})
 
 	prefixLen := len(prefix)
@@ -62,7 +62,7 @@ func (m PrefixMap) HasPrefix(prefix string) map[string]interface{} {
 	return results
 }
 
-func TestMapHasPrefix(t *testing.T) {
+func TestMapWithPrefix(t *testing.T) {
 	cases := []struct {
 		Key           string
 		ExpectedValue map[string]interface{}
@@ -90,7 +90,7 @@ func TestMapHasPrefix(t *testing.T) {
 	}
 
 	for _, item := range cases {
-		value := m.HasPrefix(item.Key)
+		value := m.WithPrefix(item.Key)
 		if !reflect.DeepEqual(value, item.ExpectedValue) {
 			t.Errorf("Invalid Map prefix values: expected %v, got %v", item.ExpectedValue, value)
 		}
@@ -143,9 +143,9 @@ func TestEdgeCases(t *testing.T) {
 		"xyz": "xyz",
 	}
 	trie.Insert("xyz", "xyz")
-	got := trie.HasPrefix("")
+	got := trie.WithPrefix("")
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("HasPrefix must include root node data if available")
+		t.Errorf("WithPrefix must include root node data if available")
 	}
 }
 
@@ -203,7 +203,7 @@ func TestDelete(t *testing.T) {
 	}
 }
 
-func TestHasPrefix(t *testing.T) {
+func TestWithPrefix(t *testing.T) {
 	cases := []struct {
 		Key           string
 		ExpectedValue map[string]interface{}
@@ -228,7 +228,7 @@ func TestHasPrefix(t *testing.T) {
 	trie := getTestTrie()
 
 	for _, item := range cases {
-		value := trie.HasPrefix(item.Key)
+		value := trie.WithPrefix(item.Key)
 		if !reflect.DeepEqual(value, item.ExpectedValue) {
 			t.Errorf("Invalid prefix values: expected %v, got %v", item.ExpectedValue, value)
 		}
@@ -272,23 +272,23 @@ func getBenchMap() map[string]interface{} {
 	return m
 }
 
-func BenchmarkHasPrefixTrie(b *testing.B) {
+func BenchmarkWithPrefixTrie(b *testing.B) {
 	trie := getBenchTrie()
 
 	length := len(benchData)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_ = trie.HasPrefix(benchData[i%length])
+		_ = trie.WithPrefix(benchData[i%length])
 	}
 }
 
-func BenchmarkHasPrefixMap(b *testing.B) {
+func BenchmarkWithPrefixMap(b *testing.B) {
 	m := PrefixMap(getBenchMap())
 
 	length := len(benchData)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_ = m.HasPrefix(benchData[i%length])
+		_ = m.WithPrefix(benchData[i%length])
 	}
 }
 
