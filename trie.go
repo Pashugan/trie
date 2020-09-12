@@ -89,7 +89,6 @@ func (trie *Trie) WithPrefix(prefix string) map[string]interface{} {
 		results[prefix] = n.data
 	}
 
-	// Explicit declaration is needed for recursion to work
 	var findResults func(*node, string)
 	findResults = func(n *node, prefix string) {
 		for r, c := range n.children {

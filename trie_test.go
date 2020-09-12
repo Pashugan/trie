@@ -44,6 +44,8 @@ func init() {
 	}
 }
 
+// PrefixMap searches for prefixes in a map,
+// ignoring thread-safety for simplicity
 type PrefixMap map[string]interface{}
 
 func (m PrefixMap) WithPrefix(prefix string) map[string]interface{} {
@@ -62,10 +64,26 @@ func (m PrefixMap) WithPrefix(prefix string) map[string]interface{} {
 	return results
 }
 
+func getTestTrie() *Trie {
+	trie := NewTrie()
+	for _, item := range testData {
+		trie.Insert(item.Key, item.Value)
+	}
+	return trie
+}
+
+func getTestPrefixMap() PrefixMap {
+	m := make(PrefixMap)
+	for _, item := range testData {
+		m[item.Key] = item.Value
+	}
+	return m
+}
+
 func TestMapWithPrefix(t *testing.T) {
-	cases := []struct {
-		Key           string
-		ExpectedValue map[string]interface{}
+	tests := []struct {
+		key  string
+		want map[string]interface{}
 	}{
 		{"f", map[string]interface{}{
 			"foo":    11,
@@ -84,31 +102,18 @@ func TestMapWithPrefix(t *testing.T) {
 		{"xyz", map[string]interface{}{}},
 	}
 
-	m := make(PrefixMap)
-	for _, item := range testData {
-		m[item.Key] = item.Value
-	}
+	m := getTestPrefixMap()
 
-	for _, item := range cases {
-		value := m.WithPrefix(item.Key)
-		if !reflect.DeepEqual(value, item.ExpectedValue) {
-			t.Errorf("Invalid Map prefix values: expected %v, got %v", item.ExpectedValue, value)
+	for _, test := range tests {
+		value := m.WithPrefix(test.key)
+		if !reflect.DeepEqual(value, test.want) {
+			t.Errorf("Invalid Map prefix values: expected %v, got %v", test.want, value)
 		}
 	}
 }
 
-func getTestTrie() *Trie {
-	trie := NewTrie()
-	for _, item := range testData {
-		trie.Insert(item.Key, item.Value)
-	}
-	return trie
-}
-
 func TestNewTrie(t *testing.T) {
-	var trie interface{}
-
-	trie = NewTrie()
+	var trie interface{} = NewTrie()
 	_, ok := trie.(*Trie)
 	if !ok {
 		t.Errorf("Invalid trie type")
@@ -150,9 +155,9 @@ func TestEdgeCases(t *testing.T) {
 }
 
 func TestInsertAndSearch(t *testing.T) {
-	cases := []struct {
-		Key           string
-		ExpectedValue interface{}
+	tests := []struct {
+		key  string
+		want interface{}
 	}{
 		{"foo", 11},
 		{"foobar", 111},
@@ -163,18 +168,18 @@ func TestInsertAndSearch(t *testing.T) {
 
 	trie := getTestTrie()
 
-	for _, item := range cases {
-		value := trie.Search(item.Key)
-		if value != item.ExpectedValue {
-			t.Errorf("Invalid value: expected %v, got %v", item.ExpectedValue, value)
+	for _, test := range tests {
+		value := trie.Search(test.key)
+		if value != test.want {
+			t.Errorf("Invalid value: expected %v, got %v", test.want, value)
 		}
 	}
 }
 
 func TestDelete(t *testing.T) {
-	cases := []struct {
-		Key           string
-		ExpectedValue interface{}
+	tests := []struct {
+		key  string
+		want interface{}
 	}{
 		{"foo", 11},
 		{"bar", 22},
@@ -195,18 +200,18 @@ func TestDelete(t *testing.T) {
 		t.Errorf("Deleting existing key must not return nil")
 	}
 
-	for _, item := range cases {
-		value := trie.Search(item.Key)
-		if value != item.ExpectedValue {
-			t.Errorf("Invalid value: expected %v, got %v", item.ExpectedValue, value)
+	for _, test := range tests {
+		value := trie.Search(test.key)
+		if value != test.want {
+			t.Errorf("Invalid value: expected %v, got %v", test.want, value)
 		}
 	}
 }
 
 func TestWithPrefix(t *testing.T) {
-	cases := []struct {
-		Key           string
-		ExpectedValue map[string]interface{}
+	tests := []struct {
+		key  string
+		want map[string]interface{}
 	}{
 		{"f", map[string]interface{}{
 			"foo":    11,
@@ -227,18 +232,18 @@ func TestWithPrefix(t *testing.T) {
 
 	trie := getTestTrie()
 
-	for _, item := range cases {
-		value := trie.WithPrefix(item.Key)
-		if !reflect.DeepEqual(value, item.ExpectedValue) {
-			t.Errorf("Invalid prefix values: expected %v, got %v", item.ExpectedValue, value)
+	for _, test := range tests {
+		value := trie.WithPrefix(test.key)
+		if !reflect.DeepEqual(value, test.want) {
+			t.Errorf("Invalid prefix values: expected %v, got %v", test.want, value)
 		}
 	}
 }
 
 func TestCounters(t *testing.T) {
-	cases := []struct {
-		ExpectedLen     int
-		ExpectedNodeNum int
+	tests := []struct {
+		wantLen     int
+		wantNodeNum int
 	}{
 		{1, 3 + 1}, // +1 includes the root node
 		{2, 6 + 1},
@@ -247,11 +252,11 @@ func TestCounters(t *testing.T) {
 	trie := NewTrie()
 	for i, item := range testData {
 		trie.Insert(item.Key, item.Value)
-		if trie.Len() != cases[i].ExpectedLen {
-			t.Errorf("Invalid trie length: expected %v, got %v", cases[i].ExpectedLen, trie.Len())
+		if trie.Len() != tests[i].wantLen {
+			t.Errorf("Invalid trie length: expected %v, got %v", tests[i].wantLen, trie.Len())
 		}
-		if trie.NodeNum() != cases[i].ExpectedNodeNum {
-			t.Errorf("Invalid trie node number: expected %v, got %v", cases[i].ExpectedNodeNum, trie.NodeNum())
+		if trie.NodeNum() != tests[i].wantNodeNum {
+			t.Errorf("Invalid trie node number: expected %v, got %v", tests[i].wantNodeNum, trie.NodeNum())
 		}
 	}
 }
@@ -264,8 +269,8 @@ func getBenchTrie() *Trie {
 	return trie
 }
 
-func getBenchMap() map[string]interface{} {
-	m := make(map[string]interface{})
+func getBenchPrefixMap() PrefixMap {
+	m := make(PrefixMap)
 	for _, key := range benchData {
 		m[key] = struct{}{}
 	}
@@ -273,6 +278,7 @@ func getBenchMap() map[string]interface{} {
 }
 
 func BenchmarkWithPrefixTrie(b *testing.B) {
+	b.ReportAllocs()
 	trie := getBenchTrie()
 
 	length := len(benchData)
@@ -283,7 +289,8 @@ func BenchmarkWithPrefixTrie(b *testing.B) {
 }
 
 func BenchmarkWithPrefixMap(b *testing.B) {
-	m := PrefixMap(getBenchMap())
+	b.ReportAllocs()
+	m := getBenchPrefixMap()
 
 	length := len(benchData)
 	b.ResetTimer()
@@ -293,6 +300,7 @@ func BenchmarkWithPrefixMap(b *testing.B) {
 }
 
 func BenchmarkInsertTrie(b *testing.B) {
+	b.ReportAllocs()
 	trie := NewTrie()
 	length := len(benchData)
 	b.ResetTimer()
@@ -302,6 +310,7 @@ func BenchmarkInsertTrie(b *testing.B) {
 }
 
 func BenchmarkInsertMap(b *testing.B) {
+	b.ReportAllocs()
 	m := make(map[string]interface{})
 	length := len(benchData)
 	b.ResetTimer()
@@ -311,6 +320,7 @@ func BenchmarkInsertMap(b *testing.B) {
 }
 
 func BenchmarkSearchTrie(b *testing.B) {
+	b.ReportAllocs()
 	trie := getBenchTrie()
 
 	length := len(benchData)
@@ -321,7 +331,8 @@ func BenchmarkSearchTrie(b *testing.B) {
 }
 
 func BenchmarkSearchMap(b *testing.B) {
-	m := getBenchMap()
+	b.ReportAllocs()
+	m := getBenchPrefixMap()
 
 	length := len(benchData)
 	b.ResetTimer()
@@ -331,6 +342,7 @@ func BenchmarkSearchMap(b *testing.B) {
 }
 
 func BenchmarkDeleteTrie(b *testing.B) {
+	b.ReportAllocs()
 	trie := getBenchTrie()
 
 	length := len(benchData)
@@ -341,7 +353,8 @@ func BenchmarkDeleteTrie(b *testing.B) {
 }
 
 func BenchmarkDeleteMap(b *testing.B) {
-	m := getBenchMap()
+	b.ReportAllocs()
+	m := getBenchPrefixMap()
 
 	length := len(benchData)
 	b.ResetTimer()
@@ -351,6 +364,7 @@ func BenchmarkDeleteMap(b *testing.B) {
 }
 
 func BenchmarkSearchWhileInsert(b *testing.B) {
+	b.ReportAllocs()
 	trie := getBenchTrie()
 
 	length := len(benchData)
@@ -363,6 +377,7 @@ func BenchmarkSearchWhileInsert(b *testing.B) {
 }
 
 func BenchmarkInsertWhileSearch(b *testing.B) {
+	b.ReportAllocs()
 	trie := getBenchTrie()
 
 	length := len(benchData)
@@ -375,6 +390,7 @@ func BenchmarkInsertWhileSearch(b *testing.B) {
 }
 
 func BenchmarkSearchWhileInsertParallel(b *testing.B) {
+	b.ReportAllocs()
 	trie := getBenchTrie()
 
 	length := len(benchData)
@@ -391,6 +407,7 @@ func BenchmarkSearchWhileInsertParallel(b *testing.B) {
 }
 
 func BenchmarkInsertWhileSearchParallel(b *testing.B) {
+	b.ReportAllocs()
 	trie := getBenchTrie()
 
 	length := len(benchData)
