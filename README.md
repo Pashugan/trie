@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/Pashugan/trie.svg?branch=master)](https://travis-ci.com/Pashugan/trie)
+![Build Status](https://github.com/Pashugan/trie/actions/workflows/main.yml/badge.svg)
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/Pashugan/trie?tab=doc)
 [![Go Report Card](https://goreportcard.com/badge/github.com/Pashugan/trie)](https://goreportcard.com/report/github.com/Pashugan/trie)
 [![GitHub license](https://img.shields.io/github/license/Pashugan/trie)](LICENSE)
